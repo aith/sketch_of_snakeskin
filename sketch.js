@@ -1,5 +1,5 @@
-let canW = 1100;
-let canH = 1100;
+let canW = 1200;
+let canH = 1200;
 let bg = 000
 
 // The render distance- larger than the canvas. To be generated
@@ -34,7 +34,14 @@ function setup() {
     background(000);
     createButton("Reimagine").mousePressed(reimagine);
     calcMetrics();
+    assert();
     generateScales();
+}
+
+function assert() {
+    if (scaleTotalW % totalW != 0) {
+        print("For looping, make sure that the scaleTotalW % TotalW == 0")
+    }
 }
 
 function calcMetrics() {
@@ -55,8 +62,8 @@ function calcMetrics() {
 }
 
 function generateScales() {
-    for (let x = 0; x < scalesPerRow * 2; x++) {  // Doubled because diamonds "overlap" on X
-        let OffX =  -scaleTotalW + (x * scaleTotalW)/2;
+    for (let x = 0; x < scalesPerRow * 2 + 2; x++) {     // Doubled because diamonds "overlap" on X...
+        let OffX =  -scaleTotalW + (x * scaleTotalW)/2;  // and +2 because of the two columns outside of canvas
         for (let y = 0; y < scalesPerCol; y++) {
             let OffY = -scaleTotalH + y * scaleTotalH;
             if (x & 1) OffY += scaleTotalH/2;  // Cause a diagonalization effect
