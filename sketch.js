@@ -27,6 +27,7 @@ function setup() {
     createButton("Reimagine").mousePressed(reimagine);
     calcMetrics();
     generateScales();
+    drawScales();
 }
 
 function calcMetrics() {
@@ -44,12 +45,11 @@ function calcMetrics() {
 }
 
 function generateScales() {
-    let OffX = 0;
-    let OffY = 0;
-    for (let x = 0; x < scalesPerRow; x++) {
-        OffX =  x * scaleTotalW;
+    for (let x = 0; x < scalesPerRow * 2; x++) {
+        let OffX =  -scaleTotalW + (x * scaleTotalW)/2;
         for (let y = 0; y < scalesPerCol; y++) {
-            OffY = y * scaleTotalH;
+            let OffY = -scaleTotalH + y * scaleTotalH;
+            if (x & 1) OffY += scaleTotalH/2;  // Cause a diagonalization effect
             // Vertex Coordinates
             let x1 = OffX + scaleOffX,            y1 = OffY + scaleH/2 + scaleOffY,
                 x2 = OffX + scaleW/2 + scaleOffX, y2 = OffY + scaleOffY,
@@ -59,6 +59,18 @@ function generateScales() {
             scaleXArr.push(x1, x2, x3, x4);
             scaleYArr.push(y1, y2, y3, y4);
         }
+    }
+}
+
+function drawScales() {
+    for (let i = 0; i < scaleXArr.length;) {
+        beginShape();
+        fill("#FACADE");
+        vertex(scaleXArr[i], scaleYArr[i++]);
+        vertex(scaleXArr[i], scaleYArr[i++]);
+        vertex(scaleXArr[i], scaleYArr[i++]);
+        vertex(scaleXArr[i], scaleYArr[i++]);
+        endShape();
     }
 }
 
