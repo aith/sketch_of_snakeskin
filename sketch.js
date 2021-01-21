@@ -1,5 +1,6 @@
-let canW = 1200;
-let canH = 1200;
+let canvas;
+let canW = 1560;
+let canH = 1080;
 let bg = 000
 
 // The render distance- larger than the canvas. To be generated
@@ -23,14 +24,22 @@ let scalesPerRow;
 
 let scaleXArr = []
 let scaleYArr = []
+let scaleColorArr = []
 
 let seed = 0;
 
 let lastMove = 0;
 let speed = 0.05;
 
+let rMin = 80;
+let rMax = 230;
+let gMin = 10;
+let gMax = 200;
+let bMin = 10;
+let bMax = 200;
+
 function setup() {
-    createCanvas(canW, canH);
+    canvas = createCanvas(canW, canH);
     background(000);
     createButton("Reimagine").mousePressed(reimagine);
     calcMetrics();
@@ -54,8 +63,8 @@ function calcMetrics() {
     scalesPerRow = totalW / (scaleTotalW);
     scalesPerCol = totalH / (scaleTotalH);
 
-    scaleBoundX = scaleOffX/2.5;
-    scaleBoundY = scaleOffY/2.5;
+    scaleBoundX = scaleOffX/2.3;
+    scaleBoundY = scaleOffY/2.3;
 
     print("scalesPerRow are " + scalesPerRow);
     print("scalesPerCol are " + scalesPerCol);
@@ -67,6 +76,9 @@ function generateScales() {
         for (let y = 0; y < scalesPerCol; y++) {
             let OffY = -scaleTotalH + y * scaleTotalH;
             if (x & 1) OffY += scaleTotalH/2;  // Cause a diagonalization effect
+
+            scaleColorArr.push(pickColor());
+
             // Vertex Coordinates
             let x1 = OffX + scaleOffX,            y1 = OffY + scaleH/2 + scaleOffY,
                 x2 = OffX + scaleW/2 + scaleOffX, y2 = OffY + scaleOffY,
@@ -85,35 +97,44 @@ function generateScales() {
     }
 }
 
+function pickColor() {
+    return color(
+        random(rMin, rMax),
+        random(gMin, gMax),
+        random(bMin, bMax)
+    );
+}
+
 function drawScales() {
-    for (let i = 0; i < scaleXArr.length;) {
+    for (let v = 0, c = 0; v < scaleXArr.length; c++) {
         // check if scales will cause clipping 
-        if (scaleXArr[i] > canW) {  
-            i += 4; // skip to next square
+        if (scaleXArr[v] > canW) {  
+            v += 4; // skip to next square
         }
         else {
             beginShape();
-            fill("#FACADE");
-            vertex(scaleXArr[i], scaleYArr[i++]);
-            vertex(scaleXArr[i], scaleYArr[i++]);
-            vertex(scaleXArr[i], scaleYArr[i++]);
-            vertex(scaleXArr[i], scaleYArr[i++]);
+            fill(scaleColorArr[c])
+            vertex(scaleXArr[v], scaleYArr[v++]);
+            vertex(scaleXArr[v], scaleYArr[v++]);
+            vertex(scaleXArr[v], scaleYArr[v++]);
+            vertex(scaleXArr[v], scaleYArr[v++]);
             endShape();
         }
     }
 }
 
 function moveScales() {
-    let distance = (millis() - lastMove) * speed;
+    let distance = (millis() - lastMove) * speed; 
     
     for (let i = 0; i < scaleXArr.length; i++) {
-        if (scaleXArr[i] > totalW) {
+        if (scaleXArr[i] >= totalW) {
             scaleXArr[i] = (scaleXArr[i] + distance) % totalW;
             scaleXArr[i] -= scaleTotalW;
         }
         else scaleXArr[i] = scaleXArr[i] + distance;
     }
     lastMove = millis();
+
 }
 
 function reimagine() {
