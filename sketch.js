@@ -125,7 +125,6 @@ function drawScales() {
 
 function moveScales() {
     let distance = (millis() - lastMove) * speed; 
-    
     for (let i = 0; i < scaleXArr.length; i++) {
         if (scaleXArr[i] >= totalW) {
             scaleXArr[i] = (scaleXArr[i] + distance) % totalW;
@@ -134,15 +133,23 @@ function moveScales() {
         else scaleXArr[i] = scaleXArr[i] + distance;
     }
     lastMove = millis();
-
 }
 
 function reimagine() {
-    seed++
+    seed++;
+    print("Resetting sketch");
+    resetSketch();
 }
 
 function draw() {
     background(bg);
     drawScales();
     moveScales();
+}
+
+function resetSketch() {
+    scaleXArr = [];
+    scaleYArr = [];
+    scaleColorArr = [];
+    generateScales();
 }
