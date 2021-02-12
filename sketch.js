@@ -1,5 +1,5 @@
 let canvas;
-let canW = 1560;
+let canW = 1560;  // For looping, make sure that the scaleTotalW % TotalW == 0
 let canH = 1080;
 let bg = 000
 
@@ -40,18 +40,24 @@ let bMin = 10;
 let bMax = 200;
 
 function setup() {
+    frameRate(10)
+    calcMetrics();
     canvas = createCanvas(canW, canH);
     background(000);
     createButton("Reimagine").mousePressed(reimagine);
-    calcMetrics();
-    assert();
     generateScales();
+    if (scaleXArr.length != scaleYArr.length) console.log("error")
+
+    for(let s = 0; s < scaleXArr.length; s++) {
+        [scaleXArr[s], scaleYArr[s]] = chaikin_cut(scaleXArr[s], scaleYArr[s], 1);
+    }
 }
 
-function assert() {
-    if (scaleTotalW % totalW != 0) {
-        print("For looping, make sure that the scaleTotalW % TotalW == 0")
-    }
+function draw() {
+    background(bg);
+    drawScales();
+    // noLoop();
+    moveScales();
 }
 
 function calcMetrics() {
@@ -102,6 +108,28 @@ function generateScales() {
     }
 }
 
+function chaikin_cut(xarr, yarr, iterations) {
+    let ratio = 1/3;
+    let new_xarr = [];
+    let new_yarr = [];
+    let n = xarr.length;
+    for(let v = 0; v < n; v++) {
+        let prev = (v-1) < 0 ? v-1+n : v-1;
+        let x0 = lerp(xarr[v], xarr[prev], ratio);
+        let y0 = lerp(yarr[v], yarr[prev], ratio);
+
+        let x1 = lerp(xarr[v], xarr[(v+1)%n], ratio);
+        let y1 = lerp(yarr[v], yarr[(v+1)%n], ratio);
+
+        new_xarr.push(x0, x1)
+        new_yarr.push(y0, y1)
+    }
+    xarr = new_xarr;
+    yarr = new_yarr;
+
+    return [xarr, yarr]
+}
+
 function pickColor() {
     return color(
         random(rMin, rMax),
@@ -116,9 +144,9 @@ function drawScales() {
         for (let v = 0; v < scaleXArr[i].length; v++) {
             let x = scaleXArr[i][v];
             let y = scaleYArr[i][v];
-            if (x > canW) {
+            if (x > canW+scaleTotalW) { // if it wraps around, cull it.
                 break;
-            } // if it wraps around, don't render it.
+            }
             vertex(x, y);
         }
         fill(scaleColorArr[i])
@@ -145,11 +173,6 @@ function reimagine() {
     resetSketch();
 }
 
-function draw() {
-    background(bg);
-    drawScales();
-    moveScales();
-}
 
 function resetSketch() {
     scaleXArr = [];
