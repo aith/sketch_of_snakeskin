@@ -1,6 +1,6 @@
 let canvas;
-let canW = 1560;  // For looping, make sure that the scaleTotalW % TotalW == 0
-let canH = 1080;
+let canW = 1080;  // For looping, make sure that the canW % scaleTotalW == 0
+let canH = 700;
 let bg = 000
 
 // The render distance- larger than the canvas. To be generated
@@ -8,12 +8,11 @@ let totalW;
 let totalH;
 
 let scaleW = 100;
-let scaleH = 100;
+let scaleH = 120;
 let scaleOffX = 10;  // The space in between scales / 2
 let scaleOffY = 10;
-let scaleTotalW = scaleOffX / 2.5;
-;  // scaleW + 2 * scaleOffX
-let scaleTotalH = scaleOffY / 2.5;
+let scaleTotalW;
+let scaleTotalH;
 
 // The size limits to the scale random gen
 let scaleBoundX;
@@ -32,29 +31,41 @@ let seed = 0;
 let lastMove = 0;
 let speed = 0.05;
 
-let rMin = 80;
-let rMax = 230;
-let gMin = 10;
-let gMax = 200;
-let bMin = 10;
-let bMax = 200;
+// pastels lol
+let rMin = 150;
+let rMax = 250;
+let gMin = 130;
+let gMax = 220;
+let bMin = 125;
+let bMax = 210;
 
 function setup() {
-    frameRate(10)
+    frameRate(30)
     calcMetrics();
     canvas = createCanvas(canW, canH);
     background(000);
-    createButton("Reimagine").mousePressed(reimagine);
+    // createButton("Reimagine").mousePressed(reimagine);
     generateScales();
-    if (scaleXArr.length != scaleYArr.length) console.log("error")
+    if (!(canW % scaleTotalW == 0)) console.debug("Error: For looping, make sure that the canW % scaleTotalW == 0")
 
-    for(let s = 0; s < scaleXArr.length; s++) {
-        [scaleXArr[s], scaleYArr[s]] = chaikin_cut(scaleXArr[s], scaleYArr[s], 1);
+    // for(let i = 0; i < 2; i++) {
+    //     for (let s = 0; s < scaleXArr.length; s++) {
+    //         [scaleXArr[s], scaleYArr[s]] = chaikin_cut(scaleXArr[s], scaleYArr[s], 1);
+    //     }
+    // }
+    if (k < 3) {
+        for(let i = 0; i < 4; i++) {
+            for (let s = 0; s < scaleXArr.length; s++) {
+                [scaleXArr[s], scaleYArr[s]] = chaikin_cut(scaleXArr[s], scaleYArr[s], 1);
+            }
+        }
+        k++
     }
 }
 
+let k = 0;
 function draw() {
-    background(bg);
+    background("#ffd1dc");
     drawScales();
     // noLoop();
     moveScales();
@@ -70,8 +81,8 @@ function calcMetrics() {
     scalesPerRow = totalW / (scaleTotalW);
     scalesPerCol = totalH / (scaleTotalH);
 
-    scaleBoundX = scaleOffX / 2.3;
-    scaleBoundY = scaleOffY / 2.3;
+    scaleBoundX = scaleOffX * 10;
+    scaleBoundY = scaleOffY * 10;
 
     print("scalesPerRow are " + scalesPerRow);
     print("scalesPerCol are " + scalesPerCol);
@@ -138,9 +149,11 @@ function pickColor() {
     );
 }
 
+let t = 0;
 function drawScales() {
     for (let i = 0, c = 0; i < scaleXArr.length; i++){
         beginShape();
+        noStroke()
         for (let v = 0; v < scaleXArr[i].length; v++) {
             let x = scaleXArr[i][v];
             let y = scaleYArr[i][v];
@@ -154,14 +167,16 @@ function drawScales() {
     }
 }
 
+
 function moveScales() {
-    let distance = (millis() - lastMove) * speed;
+    let distance = (millis() - lastMove) * speed + 1;
     for (let i = 0; i < scaleXArr.length; i++) {
+        let n = noise(i, 0) * 1.2 * sin(t);
         for (let v = 0; v < scaleXArr[i].length; v++) {
-            if (scaleXArr[i][v] >= totalW) {
-                scaleXArr[i][v] = (scaleXArr[i][v] + distance) % totalW;
-                scaleXArr[i][v] -= scaleTotalW;
-            } else scaleXArr[i][v] = scaleXArr[i][v] + distance;
+            if (scaleXArr[i][v] >= totalW + scaleBoundX * 3) {
+                scaleXArr[i][v] = (scaleXArr[i][v] + n) % totalW;
+                scaleXArr[i][v] -= scaleTotalW + scaleBoundX * 3;
+            } else scaleXArr[i][v] = scaleXArr[i][v] + n;
         }
     }
     lastMove = millis(); // TODO remove
